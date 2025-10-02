@@ -1,0 +1,13 @@
+{% extends 'base.html' %}
+
+{% block title %}Page Not Found - Django Project{% endblock %}
+
+{% block content %}
+    <h1 class="error-code">404</h1>
+    <h2 class="error-message">Page Not Found</h2>
+    <p class="error-description">
+        The page you're looking for doesn't exist.
+        It might have been moved, deleted, or you entered the wrong URL.
+    </p>
+    <a href="/" class="btn">Go Home</a>
+{% endblock %}

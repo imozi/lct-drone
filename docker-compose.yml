@@ -1,0 +1,108 @@
+
+services:
+  postgis:
+    image: postgis/postgis:17-3.5
+    env_file:
+      - ./apps/backend/.env
+    user: nobody
+    volumes:
+      - /etc/localtime:/etc/localtime:ro
+      - ./database:/var/lib/postgresql/data
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.system == services
+          - node.labels.place == secure
+    networks:
+      - lct
+
+  redis:
+    image: redis:7-alpine
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.system == services
+          - node.labels.place == secure
+    networks:
+      - lct
+
+  tegola-provider:
+    image: gospatial/tegola:latest
+    volumes:
+      - ./apps/backend/tegola:/data
+    command: >
+      serve --config /data/tegola.config.toml
+      env_file:
+    environment:
+      DB_HOST: postgis
+      DB_PORT: 5432
+      DB_NAME: drone_flights
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      TEGOLA_POSTGIS_SSL: disable
+      TEGOLA_REDIS_SSL: 'false'
+      REDIS_HOST: 'redis:6379'
+      REDIS_PASSWORD: ""
+      TEGOLA_SQL_DEBUG: LAYER_SQL
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.system == services
+          - node.labels.place == secure
+    networks:
+      - lct
+
+  backend:
+    image: backend-web-app:latest
+    volumes:
+      - ./apps/backend:/app
+
+    env_file:
+    - ./apps/backend/.env
+    command: >
+      sh -c "
+        python src/manage.py collectstatic --noinput &&
+        python src/manage.py runserver 0.0.0.0:8000
+      "
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.system == services
+          - node.labels.place == secure
+    networks:
+      - lct
+
+  nginx:
+    image: nginx:alpine
+    volumes:
+      - ./www:/var/www/
+      - /etc/localtime:/etc/localtime:ro
+      - ./conf.d:/etc/nginx/conf.d/
+      - ./apps/backend/staticfiles/:/home/django-static/
+      - ./apps/backend/media/:/home/django-media/
+
+    deploy:
+      mode: global
+      placement:
+        constraints:
+          - node.labels.system == services
+          - node.labels.place == secure
+      labels:
+        - traefik.enable=true
+        - traefik.http.routers.lct.rule=Host(`lct.kamdigital.ru`)
+        - traefik.http.routers.lct.entrypoints=https
+        - traefik.http.routers.lct.tls=true
+        - traefik.http.routers.lct.tls.certresolver=letsencrypt
+        - traefik.http.services.lct.loadbalancer.server.port=80
+    networks:
+      - lct
+      - traefik-proxy-cloud
+networks:
+  traefik-proxy-cloud:
+    external: true
+  lct:
+    external: true

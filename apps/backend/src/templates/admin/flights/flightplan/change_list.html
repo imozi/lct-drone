@@ -1,0 +1,125 @@
+{% extends "admin/change_list.html" %}
+{% load i18n admin_urls static %}
+
+{% block object-tools-items %}
+    {{ block.super }}
+
+    {% if upload_excel_url %}
+        <li>
+            <a href="{% url upload_excel_url %}" class="addlink" style="
+                background: linear-gradient(135deg, #28a745, #20c997);
+                color: white;
+                padding: 8px 15px;
+                border-radius: 5px;
+                text-decoration: none;
+                margin-left: 5px;
+                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+                transition: all 0.3s ease;
+            " onmouseover="this.style.background='linear-gradient(135deg, #218838, #1ea58a)'; this.style.transform='translateY(-1px)';"
+               onmouseout="this.style.background='linear-gradient(135deg, #28a745, #20c997)'; this.style.transform='translateY(0)';">
+                📊 Загрузить Excel файл
+            </a>
+        </li>
+    {% endif %}
+
+{% endblock %}
+
+{% block extrahead %}
+    {{ block.super }}
+    <style>
+        /* Дополнительные стили для админ панели */
+        .object-tools li {
+            margin-left: 5px;
+        }
+
+        .object-tools a {
+            font-weight: 500;
+            font-size: 13px;
+        }
+
+        .object-tools a:active {
+            transform: translateY(0) !important;
+        }
+
+        /* Стили для улучшения читаемости списка */
+        #result_list th {
+            position: sticky;
+            top: 0;
+            background: #f8f9fa;
+            z-index: 10;
+        }
+
+        /* Выделение важных столбцов */
+        #result_list td:nth-child(2) { /* flight_id */
+            font-weight: bold;
+            color: #007cba;
+        }
+
+        #result_list td:nth-child(3) { /* planned_date */
+            font-weight: 500;
+        }
+
+        /* Индикаторы статуса */
+        .flight-status {
+            padding: 3px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        .flight-status.planned {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .flight-status.departed {
+            background: #cce7ff;
+            color: #0056b3;
+        }
+
+        .flight-status.completed {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .flight-status.cancelled {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        /* Подсветка координат */
+        .coordinates {
+            font-family: 'Courier New', monospace;
+            font-size: 11px;
+            color: #6c757d;
+        }
+    </style>
+{% endblock %}
+
+{% block result_list %}
+    {{ block.super }}
+
+    {% if cl.result_count > 0 %}
+        <div class="results-summary" style="
+            background: #e3f2fd;
+            border: 1px solid #bbdefb;
+            border-radius: 6px;
+            padding: 15px;
+            margin: 20px 0;
+        ">
+            <h4 style="margin: 0 0 10px 0; color: #1976d2;">📊 Краткая статистика</h4>
+            <div style="display: flex; flex-wrap: wrap; gap: 20px;">
+                <div>
+                    <strong>Всего планов полетов:</strong> {{ cl.result_count }}
+                </div>
+                <div>
+                    <strong>На этой странице:</strong> {{ cl.result_list|length }}
+                </div>
+            </div>
+            <div style="margin-top: 10px; font-size: 12px; color: #666;">
+                💡 Используйте фильтры слева для поиска конкретных полетов
+            </div>
+        </div>
+    {% endif %}
+{% endblock %}

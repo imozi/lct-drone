@@ -1,0 +1,96 @@
+services:
+  db:
+    image: postgis/postgis:17-3.5
+    container_name: drone_flights_db
+    environment:
+      POSTGRES_DB: drone_flights
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+      POSTGRES_HOST_AUTH_METHOD: trust
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+      - ./docker/postgres/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  redis:
+    image: redis:7-alpine
+    container_name: drone_flights_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  tegola-provider:
+    image: gospatial/tegola:latest
+    container_name: drone_tegola_provider
+    depends_on:
+      db:
+        condition: service_healthy
+    restart: "unless-stopped"
+    ports:
+      - 8080:8080
+    volumes:
+      - ./tegola:/data
+    command: >
+      serve --config /data/tegola.config.toml
+    environment:
+      DB_HOST: db
+      DB_PORT: 5432
+      DB_NAME: drone_flights
+      DB_USER: postgres
+      DB_PASSWORD: postgres
+      TEGOLA_POSTGIS_SSL: disable
+      TEGOLA_REDIS_SSL: false
+      REDIS_HOST: redis:6379
+      REDIS_PASSWORD: ""
+      TEGOLA_SQL_DEBUG: LAYER_SQL
+
+  web-app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: drone_flights_web
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DEBUG=1
+      - SECRET_KEY=dev-secret-key-change-in-production
+      - DB_NAME=drone_flights
+      - DB_USER=postgres
+      - DB_PASSWORD=postgres
+      - DB_HOST=db
+      - DB_PORT=5432
+      - REDIS_URL=redis://redis:6379/0
+    depends_on:
+      db:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    restart: unless-stopped
+    command: >
+      sh -c "
+        python src/manage.py collectstatic --noinput &&
+        python src/manage.py makemigrations &&
+        python src/manage.py migrate &&
+        python src/manage.py runserver 0.0.0.0:8000
+      "
+
+volumes:
+  postgres_data:
+
+networks:
+  default:
+    name: drone_flights_network

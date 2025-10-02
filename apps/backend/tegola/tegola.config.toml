@@ -1,0 +1,95 @@
+[webserver]
+port = ":8080"
+
+[webserver.headers]
+Cache-Control = "s-maxage=3600"
+
+[cache]
+type = "redis"
+address = "${REDIS_HOST}"
+password = "${REDIS_PASSWORD}"
+ttl = 10
+max_zoom = 18
+ssl = "${TEGOLA_REDIS_SSL}"
+db = 1
+
+[[providers]]
+name = "russia"
+type = "mvt_postgis"
+uri = "postgres://${DB_USER}:${DB_PASSWORD}@${DB_HOST}:${DB_PORT}/${DB_NAME}?sslmode=${TEGOLA_POSTGIS_SSL}"
+srid = 4326
+
+
+  [[providers.layers]]
+    name = "russian_regions" 
+    tablename = "flights_russianregion" 
+    geometry_type = "MultiPolygon"
+    geometry_fieldname = "geometry"
+    sql = """
+      SELECT 
+        id,
+        name,
+        code,
+        utc,
+        area,
+        timezone,
+        ST_AsMVTGeom(
+          ST_Transform(geometry, 3857),
+          ST_Transform(!BBOX!, 3857)
+        ) AS geometry
+      FROM public.flights_russianregion
+      WHERE geometry && !BBOX!
+    """
+
+  [[providers.layers]]
+    name = "russian_regions_water" 
+    tablename = "flights_russianregionwithwater" 
+    geometry_type = "MultiPolygon"
+    geometry_fieldname = "geometry"
+    sql = """
+      SELECT 
+        id,
+        name,
+        code,
+        utc,
+        timezone,
+        ST_AsMVTGeom(
+          ST_Transform(geometry, 3857),
+          ST_Transform(!BBOX!, 3857)
+        ) AS geometry
+      FROM public.flights_russianregionwithwater
+      WHERE geometry && !BBOX!
+    """
+
+  [[providers.layers]]
+    name = "russian_regions_label" 
+    tablename = "flights_russianregion" 
+    geometry_type = "MultiPolygon"
+    geometry_fieldname = "geometry"
+    sql = """
+      SELECT 
+        id,
+        name,
+        ST_AsMVTGeom(
+          ST_Transform(ST_PointOnSurface(geometry), 3857),
+          ST_Transform(!BBOX!, 3857)
+        ) AS geometry
+      FROM public.flights_russianregion
+      WHERE geometry && !BBOX!
+    """
+
+
+[[maps]]
+name = "russia_map"
+
+  [[maps.layers]]
+  name = "russian_regions_label"
+  provider_layer = "russia.russian_regions_label"
+
+  [[maps.layers]]
+  name = "russian_regions_water"
+  provider_layer = "russia.russian_regions_water"
+
+  [[maps.layers]]
+  name = "russian_regions"
+  provider_layer = "russia.russian_regions"

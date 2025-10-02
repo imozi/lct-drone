@@ -1,0 +1,21 @@
+{
+  "name": "@lct/services",
+  "version": "0.0.1",
+  "type": "module",
+  "main": "./src/index.ts",
+  "module": "./src/index.ts",
+  "description": "",
+  "peerDependencies": {
+    "axios": "^1.12.2"
+  },
+  "devDependencies": {
+    "@vitejs/plugin-vue": "^6.0.1",
+    "@vue/tsconfig": "^0.7.0",
+    "typescript": "~5.9.2",
+    "vite": "^7.1.5",
+    "vite-plugin-dts": "^4.5.4",
+    "vue-tsc": "^3.0.6"
+  },
+  "license": "MIT",
+  "packageManager": "pnpm@10.15.1"
+}

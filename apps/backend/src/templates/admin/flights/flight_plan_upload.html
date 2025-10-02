@@ -1,0 +1,435 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls static %}
+
+{% block title %}{{ title }} | {% trans 'Django site admin' %}{% endblock %}
+
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+    <a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+    &rsaquo; <a href="{% url 'admin:app_list' app_label='flights' %}">{% trans 'Flights' %}</a>
+    &rsaquo; <a href="{% url 'admin:flights_flightplan_changelist' %}">{% trans 'Flight plans' %}</a>
+    &rsaquo; {{ title }}
+</div>
+{% endblock %}
+
+{% block content %}
+<div class="upload-container">
+    <h1>{{ title }}</h1>
+    
+    <div class="help-section">
+        <h3>📋 Инструкция по загрузке данных</h3>
+        
+        <div class="info-block">
+            <h4>🔧 Поддерживаемые форматы:</h4>
+            <ul>
+                <li>Excel файлы (.xlsx, .xls)</li>
+                <li>Максимальный размер: 50MB</li>
+                <li>Кодировка: UTF-8</li>
+            </ul>
+        </div>
+
+        <div class="info-block">
+            <h4>📊 Структура файла:</h4>
+            <p>Excel файл должен содержать следующие столбцы:</p>
+            <table class="structure-table">
+                <thead>
+                    <tr>
+                        <th>Столбец</th>
+                        <th>Описание</th>
+                        <th>Пример данных</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td><strong>SHR</strong></td>
+                        <td>Данные плана полета</td>
+                        <td>SHR-ZZZZZ -ZZZZ0700 -M0020/M0030...</td>
+                    </tr>
+                    <tr>
+                        <td><strong>DEP</strong></td>
+                        <td>Данные фактического вылета</td>
+                        <td>-TITLE IDEP -SID 7772288076...</td>
+                    </tr>
+                    <tr>
+                        <td><strong>ARR</strong></td>
+                        <td>Данные фактического прибытия</td>
+                        <td>-TITLE IARR -SID 7772288076...</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="warning-block">
+            <h4>⚠️ Важные моменты:</h4>
+            <ul>
+                <li>Загрузка нового файла создаст новые планы полетов</li>
+                <li>Дубликаты по sid будут пропущены</li>
+                <li>Некорректные строки будут проигнорированы с выводом ошибок</li>
+                <li>Геопривязка к регионам выполняется автоматически</li>
+                <li>Операторы и типы БАС создаются автоматически</li>
+            </ul>
+        </div>
+
+        <div class="example-block">
+            <h4>📝 Пример реальных данных в столбце SHR:</h4>
+            <pre><code>(SHR-00725
+-ZZZZ0600
+-M0000/M0005 /ZONA R0,5 4408N04308E/
+-ZZZZ0700
+-DEP/4408N04308E DEST/4408N04308E DOF/250124
+OPR/ГУ МЧС РОССИИ ПО СТАВРОПОЛЬСКОМУ КРАЮ
+REG/00724,REG00725 STS/SAR TYP/BLA
+RMK/WR655 В ЗОНЕ ВИЗУАЛЬНОГО ПОЛЕТА
+АДМИНИСТРАЦИЯ МУНИЦИПАЛЬНОГО ОКРУГА
+ОПЕРАТОР ИВАНОВ +79281234567
+SID/7772251137)</code></pre>
+
+            <h5>🔍 Что извлекается из этих данных:</h5>
+            <ul>
+                <li><strong>ID полета:</strong> 00725</li>
+                <li><strong>Время вылета:</strong> 06:00 UTC</li>
+                <li><strong>Время посадки:</strong> 07:00 UTC (продолжительность: 1 час)</li>
+                <li><strong>Высота полета:</strong> 0-5 метров</li>
+                <li><strong>Координаты:</strong> 44.133°N, 43.133°E</li>
+                <li><strong>Дата:</strong> 24.01.2025</li>
+                <li><strong>Оператор:</strong> ГУ МЧС РОССИИ ПО СТАВРОПОЛЬСКОМУ КРАЮ</li>
+                <li><strong>Тип БАС:</strong> BLA (беспилотная авиационная система)</li>
+                <li><strong>Цель:</strong> Мониторинг в визуальной зоне полета</li>
+            </ul>
+        </div>
+
+        <div class="example-block">
+            <h4>📝 Пример данных в столбце DEP (фактический вылет):</h4>
+            <pre><code>-TITLE IDEP
+-SID 7772251137
+-ADD 250124
+-ATD 0600
+-ADEP ZZZZ
+-ADEPZ 440846N0430829E
+-PAP 0</code></pre>
+
+            <h5>🔍 Что извлекается:</h5>
+            <ul>
+                <li><strong>Дата вылета:</strong> 24.01.2025</li>
+                <li><strong>Время вылета:</strong> 06:00 UTC</li>
+                <li><strong>Координаты:</strong> 44.146111°N, 43.141389°E (с точностью до секунд)</li>
+            </ul>
+        </div>
+
+        <div class="example-block">
+            <h4>📝 Пример данных в столбце ARR (фактическое прибытие):</h4>
+            <pre><code>-TITLE IARR
+-SID 7772251137
+-ADA 250124
+-ATA 1250
+-ADARR ZZZZ
+-ADARRZ 440846N0430829E
+-PAP 0</code></pre>
+
+            <h5>🔍 Что извлекается:</h5>
+            <ul>
+                <li><strong>Дата прибытия:</strong> 24.01.2025</li>
+                <li><strong>Время прибытия:</strong> 12:50 UTC</li>
+                <li><strong>Координаты:</strong> 44.146111°N, 43.141389°E</li>
+                <li><strong>Фактическая продолжительность:</strong> 6 часов 50 минут</li>
+            </ul>
+        </div>
+    </div>
+
+    <form method="post" enctype="multipart/form-data" class="upload-form">
+        {% csrf_token %}
+        
+        <div class="form-group">
+            <label for="{{ form.excel_file.id_for_label }}">
+                {{ form.excel_file.label }}
+            </label>
+            {{ form.excel_file }}
+            {% if form.excel_file.help_text %}
+                <div class="help-text">{{ form.excel_file.help_text }}</div>
+            {% endif %}
+            {% if form.excel_file.errors %}
+                <div class="error-messages">
+                    {% for error in form.excel_file.errors %}
+                        <div class="error">{{ error }}</div>
+                    {% endfor %}
+                </div>
+            {% endif %}
+        </div>
+
+        <div class="submit-row">
+            <input type="submit" value="🚀 Загрузить и обработать файл" class="default" />
+            <a href="{% url 'admin:flights_flightplan_changelist' %}" class="button cancel-link">
+                ⬅️ Назад к списку
+            </a>
+        </div>
+    </form>
+
+    <div class="processing-info">
+        <h4>🔄 Что происходит при обработке:</h4>
+        <ol>
+            <li>Валидация формата и размера файла</li>
+            <li>Парсинг структуры Excel файла</li>
+            <li>Извлечение данных из столбцов SHR, DEP, ARR</li>
+            <li>Создание/поиск операторов БАС</li>
+            <li>Создание/поиск типов БАС</li>
+            <li>Парсинг координат и временных данных</li>
+            <li>Геопривязка к регионам РФ</li>
+            <li>Создание планов полетов и фактических данных</li>
+            <li>Формирование отчета об обработке</li>
+        </ol>
+    </div>
+</div>
+
+<style>
+.upload-container {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 20px;
+}
+
+.help-section {
+    background: #f8f9fa;
+    border: 1px solid #dee2e6;
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 30px;
+}
+
+.info-block {
+    margin-bottom: 20px;
+    padding: 15px;
+    background: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.warning-block {
+    background: #fff3cd;
+    border: 1px solid #ffeaa7;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.example-block {
+    background: #e8f5e8;
+    border: 1px solid #c3e6c3;
+    border-radius: 6px;
+    padding: 15px;
+    margin-bottom: 20px;
+}
+
+.example-block pre {
+    background: #f8f9fa;
+    padding: 10px;
+    border-radius: 4px;
+    overflow-x: auto;
+    font-size: 12px;
+    line-height: 1.4;
+}
+
+.structure-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 10px 0;
+}
+
+.structure-table th,
+.structure-table td {
+    border: 1px solid #ddd;
+    padding: 8px 12px;
+    text-align: left;
+}
+
+.structure-table th {
+    background: #f0f0f0;
+    font-weight: bold;
+}
+
+.upload-form {
+    background: white;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    padding: 30px;
+    margin-bottom: 30px;
+}
+
+.form-group {
+    margin-bottom: 20px;
+}
+
+.form-group label {
+    display: block;
+    font-weight: bold;
+    margin-bottom: 8px;
+    color: #333;
+}
+
+.form-group input[type="file"] {
+    width: 100%;
+    padding: 10px;
+    border: 2px dashed #ddd;
+    border-radius: 6px;
+    background: #fafafa;
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.form-group input[type="file"]:hover {
+    border-color: #007cba;
+    background: #f0f8ff;
+}
+
+.help-text {
+    font-size: 12px;
+    color: #666;
+    margin-top: 5px;
+    line-height: 1.4;
+}
+
+.error-messages {
+    margin-top: 10px;
+}
+
+.error {
+    background: #f8d7da;
+    color: #721c24;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 5px;
+    border-left: 3px solid #dc3545;
+}
+
+.submit-row {
+    display: flex;
+    gap: 15px;
+    align-items: center;
+    margin-top: 25px;
+}
+
+.submit-row input[type="submit"] {
+    background: linear-gradient(135deg, #28a745, #20c997);
+    color: white;
+    padding: 12px 25px;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.submit-row input[type="submit"]:hover {
+    background: linear-gradient(135deg, #218838, #1ea58a);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+}
+
+.cancel-link {
+    background: linear-gradient(135deg, #6c757d, #5a6268);
+    color: white;
+    padding: 12px 25px;
+    text-decoration: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    transition: all 0.3s ease;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.cancel-link:hover {
+    background: linear-gradient(135deg, #5a6268, #495057);
+    transform: translateY(-1px);
+    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    color: white;
+    text-decoration: none;
+}
+
+.processing-info {
+    background: #e3f2fd;
+    border: 1px solid #bbdefb;
+    border-radius: 8px;
+    padding: 20px;
+}
+
+.processing-info ol {
+    margin: 10px 0;
+    padding-left: 20px;
+}
+
+.processing-info li {
+    margin: 8px 0;
+    line-height: 1.4;
+}
+
+h1 {
+    color: #333;
+    border-bottom: 2px solid #007cba;
+    padding-bottom: 10px;
+    margin-bottom: 30px;
+}
+
+h3 {
+    color: #007cba;
+    margin-top: 0;
+}
+
+h4 {
+    color: #495057;
+    margin: 15px 0 10px 0;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .upload-container {
+        padding: 10px;
+    }
+    
+    .submit-row {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .submit-row input[type="submit"],
+    .cancel-link {
+        text-align: center;
+        width: 100%;
+    }
+    
+    .structure-table {
+        font-size: 12px;
+    }
+    
+    .structure-table th,
+    .structure-table td {
+        padding: 6px;
+    }
+}
+</style>
+
+<script>
+// Отображение имени выбранного файла
+document.addEventListener('DOMContentLoaded', function() {
+    const fileInput = document.querySelector('input[type="file"]');
+    if (fileInput) {
+        fileInput.addEventListener('change', function(e) {
+            const fileName = e.target.files[0]?.name;
+            if (fileName) {
+                // Создаем элемент для отображения имени файла
+                let fileNameDisplay = document.querySelector('.file-name-display');
+                if (!fileNameDisplay) {
+                    fileNameDisplay = document.createElement('div');
+                    fileNameDisplay.className = 'file-name-display';
+                    e.target.parentNode.appendChild(fileNameDisplay);
+                }
+                fileNameDisplay.textContent = `Выбран файл: ${fileName}`;
+                fileNameDisplay.style.marginTop = '10px';
+                fileNameDisplay.style.color = '#28a745';
+                fileNameDisplay.style.fontWeight = 'bold';
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

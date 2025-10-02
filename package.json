@@ -1,0 +1,44 @@
+{
+  "name": "lct-monorepo",
+  "version": "0.0.1",
+  "description": "lct monorepo",
+  "scripts": {
+    "dev": "pnpm --parallel --filter \"./apps/*\" dev",
+    "dev:frontend": "pnpm --filter frontend dev",
+    "dev:backend": "pnpm --filter backend dev",
+    "down:backend": "pnpm --filter backend down",
+    "load:data": "docker exec -i drone_flights_web python src/manage.py loaddata full_data.json",
+    "build": "pnpm --filter frontend build",
+    "preview": "pnpm --filter frontend preview --port 5173"
+  },
+  "keywords": [],
+  "author": {
+    "name": "ozi",
+    "email": "zaytsevoi.90@gmail.com",
+    "url": "https://github.com/imozi"
+  },
+  "license": "ISC",
+  "packageManager": "pnpm@10.15.1",
+  "devDependencies": {
+    "@types/node": "^24.3.1",
+    "@typescript-eslint/eslint-plugin": "^8.42.0",
+    "@typescript-eslint/parser": "^8.42.0",
+    "@vue/eslint-config-typescript": "^14.6.0",
+    "eslint": "^9.35.0",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-import": "^2.32.0",
+    "eslint-plugin-prettier": "^5.5.4",
+    "eslint-plugin-vue": "^10.4.0",
+    "prettier": "^3.6.2",
+    "prettier-plugin-tailwindcss": "^0.6.14",
+    "stylelint": "^16.24.0",
+    "stylelint-config-idiomatic-order": "^10.0.0",
+    "stylelint-config-recommended-vue": "^1.6.1",
+    "stylelint-config-standard": "^39.0.0",
+    "stylelint-config-standard-scss": "^15.0.1",
+    "stylelint-scss": "^6.12.1",
+    "typescript": "^5.9.2",
+    "vitest": "^3.2.4",
+    "vue-eslint-parser": "^10.2.0"
+  }
+}

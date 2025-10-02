@@ -1,0 +1,1598 @@
+openapi: 3.0.3
+info:
+  title: Система анализа полетов БАС API
+  version: 1.0.0
+  description: API для анализа полетов беспилотных авиационных систем по регионам
+    РФ
+paths:
+  /api/v1/flights/drone-types/:
+    get:
+      operationId: flights_drone_types_list
+      description: ViewSet для типов БАС.
+      parameters:
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDroneTypeList'
+          description: ''
+  /api/v1/flights/drone-types/{id}/:
+    get:
+      operationId: flights_drone_types_retrieve
+      description: ViewSet для типов БАС.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+          description: UUID identifier
+        required: true
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DroneType'
+          description: ''
+  /api/v1/flights/flight-plans/:
+    get:
+      operationId: flights_flight_plans_list
+      description: |-
+        ViewSet для работы с планами полетов.
+
+        Предоставляет CRUD операции и дополнительные эндпоинты для:
+        - Загрузки Excel файлов
+        - Получения данных для карты
+        - Статистики
+      parameters:
+      - in: query
+        name: departure_region
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: departure_region_name
+        schema:
+          type: string
+      - in: query
+        name: destination_region
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: destination_region_name
+        schema:
+          type: string
+      - in: query
+        name: drone_type
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: drone_type_code
+        schema:
+          type: string
+      - in: query
+        name: flight_id
+        schema:
+          type: string
+      - in: query
+        name: flight_zone
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: flight_zone_code
+        schema:
+          type: string
+      - in: query
+        name: has_actual_flight
+        schema:
+          type: boolean
+      - in: query
+        name: max_altitude__gte
+        schema:
+          type: integer
+      - in: query
+        name: max_altitude__lte
+        schema:
+          type: integer
+      - in: query
+        name: min_altitude__gte
+        schema:
+          type: integer
+      - in: query
+        name: min_altitude__lte
+        schema:
+          type: integer
+      - in: query
+        name: near_point
+        schema:
+          type: string
+      - in: query
+        name: operator
+        schema:
+          type: string
+          format: uuid
+      - in: query
+        name: operator_name
+        schema:
+          type: string
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - in: query
+        name: organization_type
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - in: query
+        name: planned_date
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: planned_date__gte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: planned_date__lte
+        schema:
+          type: string
+          format: date
+      - in: query
+        name: planned_date_range
+        schema:
+          type: string
+          format: date
+          title: Плановая дата полета
+          enum:
+          - month
+          - today
+          - week
+          - year
+          - yesterday
+        description: |-
+          Плановая дата полета
+
+          * `today` - Сегодня
+          * `yesterday` - Вчера
+          * `week` - Последние 7 дней
+          * `month` - Этот месяц
+          * `year` - Этот год
+      - in: query
+        name: planned_departure_time__gte
+        schema:
+          type: string
+          format: time
+      - in: query
+        name: planned_departure_time__lte
+        schema:
+          type: string
+          format: time
+      - in: query
+        name: purpose
+        schema:
+          type: string
+      - in: query
+        name: reg_number
+        schema:
+          type: string
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      - in: query
+        name: sid
+        schema:
+          type: string
+      - in: query
+        name: within_radius
+        schema:
+          type: number
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedFlightPlanList'
+          description: ''
+    post:
+      operationId: flights_flight_plans_create
+      description: |-
+        ViewSet для работы с планами полетов.
+
+        Предоставляет CRUD операции и дополнительные эндпоинты для:
+        - Загрузки Excel файлов
+        - Получения данных для карты
+        - Статистики
+      tags:
+      - flights
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightCreate'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FlightCreate'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FlightCreate'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '201':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightCreate'
+          description: ''
+  /api/v1/flights/flight-plans/{id}/:
+    get:
+      operationId: flights_flight_plans_retrieve
+      description: |-
+        ViewSet для работы с планами полетов.
+
+        Предоставляет CRUD операции и дополнительные эндпоинты для:
+        - Загрузки Excel файлов
+        - Получения данных для карты
+        - Статистики
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+          description: UUID identifier
+        required: true
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+    put:
+      operationId: flights_flight_plans_update
+      description: |-
+        ViewSet для работы с планами полетов.
+
+        Предоставляет CRUD операции и дополнительные эндпоинты для:
+        - Загрузки Excel файлов
+        - Получения данных для карты
+        - Статистики
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+          description: UUID identifier
+        required: true
+      tags:
+      - flights
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/FlightPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FlightPlan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FlightPlan'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+    patch:
+      operationId: flights_flight_plans_partial_update
+      description: |-
+        ViewSet для работы с планами полетов.
+
+        Предоставляет CRUD операции и дополнительные эндпоинты для:
+        - Загрузки Excel файлов
+        - Получения данных для карты
+        - Статистики
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+          description: UUID identifier
+        required: true
+      tags:
+      - flights
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PatchedFlightPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/PatchedFlightPlan'
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/PatchedFlightPlan'
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+    delete:
+      operationId: flights_flight_plans_destroy
+      description: |-
+        ViewSet для работы с планами полетов.
+
+        Предоставляет CRUD операции и дополнительные эндпоинты для:
+        - Загрузки Excel файлов
+        - Получения данных для карты
+        - Статистики
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+          description: UUID identifier
+        required: true
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '204':
+          description: No response body
+  /api/v1/flights/flight-plans/advanced_analytics/:
+    get:
+      operationId: flights_flight_plans_advanced_analytics_retrieve
+      description: |-
+        Расширенные метрики полетов.
+
+        GET /api/flight-plans/advanced_analytics/
+
+        Query параметры:
+        - date_from: дата начала (YYYY-MM-DD)
+        - date_to: дата окончания (YYYY-MM-DD)
+        - metric: конкретная метрика (peak_load, daily_dynamics, growth_decline,
+                 flight_density, daily_activity, zero_flight_days, comprehensive)
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/daily_activity_analysis/:
+    get:
+      operationId: flights_flight_plans_daily_activity_analysis_retrieve
+      description: |-
+        Анализ дневной активности: распределение полетов по часам.
+
+        GET /api/flight-plans/daily_activity_analysis/
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/flight_density_analysis/:
+    get:
+      operationId: flights_flight_plans_flight_density_analysis_retrieve
+      description: |-
+        Анализ плотности полетов: число полетов на 1000км² по регионам.
+
+        GET /api/flight-plans/flight_density_analysis/
+
+        Query параметры:
+        - top: количество топ регионов (если не указан, показывает все регионы)
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/map_data/:
+    get:
+      operationId: flights_flight_plans_map_data_retrieve
+      description: |-
+        Получение данных планов полетов в формате GeoJSON для отображения на карте.
+
+        GET /api/flight-plans/map_data/
+
+        Query параметры:
+        - date_from: дата начала (YYYY-MM-DD)
+        - date_to: дата окончания (YYYY-MM-DD)
+        - region: код региона
+        - status: статус полета (planned, departed, completed)
+
+        Возвращает GeoJSON FeatureCollection.
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlanGeo'
+          description: ''
+  /api/v1/flights/flight-plans/operator_statistics/:
+    get:
+      operationId: flights_flight_plans_operator_statistics_retrieve
+      description: |-
+        Статистика по операторам.
+
+        GET /api/flight-plans/operator_statistics/
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/peak_load_analysis/:
+    get:
+      operationId: flights_flight_plans_peak_load_analysis_retrieve
+      description: |-
+        Анализ пиковой нагрузки: максимальное число полетов за час.
+
+        GET /api/flight-plans/peak_load_analysis/
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/regional_comparison/:
+    get:
+      operationId: flights_flight_plans_regional_comparison_retrieve
+      description: |-
+        Сравнительный анализ регионов по всем метрикам.
+
+        GET /api/flight-plans/regional_comparison/
+
+        Query параметры:
+        - regions: коды регионов через запятую (например: 77,78,50)
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/regional_statistics/:
+    get:
+      operationId: flights_flight_plans_regional_statistics_retrieve
+      description: |-
+        Расширенная статистика по регионам.
+
+        GET /api/flight-plans/regional_statistics/
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/time_statistics/:
+    get:
+      operationId: flights_flight_plans_time_statistics_retrieve
+      description: |-
+        Статистика полетов по времени.
+
+        GET /api/flight-plans/time_statistics/
+
+        Query параметры:
+        - period: day, week, month, year (по умолчанию month)
+        - date_from: дата начала
+        - date_to: дата окончания
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/flight-plans/upload_excel/:
+    post:
+      operationId: flights_flight_plans_upload_excel_create
+      description: |-
+        Загрузка планов полетов из Excel файла.
+
+        POST /api/flight-plans/upload_excel/
+
+        Принимает:
+        - excel_file: Excel файл (.xlsx, .xls)
+
+        Возвращает:
+        - success: статус загрузки
+        - message: сообщение об успехе/ошибке
+        - loading_time_minutes: время затраченное на загрузку в минутах
+        - total_flight_plans: общее количество полетных планов
+        - successfully_loaded: количество успешно загруженных
+        - validation_failures: количество не прошедших валидацию
+        - loading_status: статус завершения загрузки
+      tags:
+      - flights
+      requestBody:
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/FlightPlan'
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/FlightPlan'
+        required: true
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/FlightPlan'
+          description: ''
+  /api/v1/flights/operators/:
+    get:
+      operationId: flights_operators_list
+      description: ViewSet для операторов БАС.
+      parameters:
+      - name: ordering
+        required: false
+        in: query
+        description: Which field to use when ordering the results.
+        schema:
+          type: string
+      - name: page
+        required: false
+        in: query
+        description: A page number within the paginated result set.
+        schema:
+          type: integer
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PaginatedDroneOperatorList'
+          description: ''
+  /api/v1/flights/operators/{id}/:
+    get:
+      operationId: flights_operators_retrieve
+      description: ViewSet для операторов БАС.
+      parameters:
+      - in: path
+        name: id
+        schema:
+          type: string
+          format: uuid
+          description: UUID identifier
+        required: true
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DroneOperator'
+          description: ''
+  /api/v1/flights/regions/:
+    get:
+      operationId: flights_regions_list
+      description: ViewSet для регионов РФ.
+      parameters:
+      - name: search
+        required: false
+        in: query
+        description: A search term.
+        schema:
+          type: string
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/RussianRegion'
+          description: ''
+  /api/v1/flights/regions/{code}/:
+    get:
+      operationId: flights_regions_retrieve
+      description: ViewSet для регионов РФ.
+      parameters:
+      - in: path
+        name: code
+        schema:
+          type: string
+          title: Код региона
+          description: Официальный код субъекта РФ
+        required: true
+      tags:
+      - flights
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RussianRegion'
+          description: ''
+  /api/v1/flights/statistics/comprehensive_metrics/:
+    get:
+      operationId: flights_statistics_comprehensive_metrics_retrieve
+      description: |-
+        Все расширенные метрики в одном ответе.
+
+        GET /api/statistics/comprehensive_metrics/
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/flights/statistics/dashboard/:
+    get:
+      operationId: statistics_dashboard
+      description: Возвращает комплексную статистику полетов БАС по всем регионам
+        РФ
+      summary: Дашборд со статистикой полетов БАС
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/flights/statistics/export_data/:
+    get:
+      operationId: flights_statistics_export_data_retrieve
+      description: |-
+        Экспорт статистических данных.
+
+        GET /api/statistics/export_data/?format=json|csv
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/flights/statistics/export_regional_annual_excel/:
+    get:
+      operationId: flights_statistics_export_regional_annual_excel_retrieve
+      description: |-
+        Экспорт региональной годовой статистики в Excel файл.
+
+        GET /api/statistics/export_regional_annual_excel/?year=2024
+
+        Query параметры:
+        - year: год для экспорта (по умолчанию текущий год)
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/flights/statistics/growth_trends/:
+    get:
+      operationId: flights_statistics_growth_trends_retrieve
+      description: |-
+        Анализ роста/падения полетов по месяцам.
+
+        GET /api/statistics/growth_trends/
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/flights/statistics/regional_annual_statistics/:
+    get:
+      operationId: statistics_regional_annual
+      description: Детальная статистика полетов БАС по каждому региону России за год
+      summary: Региональная годовая статистика полетов
+      parameters:
+      - in: query
+        name: year
+        schema:
+          type: integer
+        description: Год для анализа (по умолчанию текущий год)
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/flights/statistics/regional_growth_trends/:
+    get:
+      operationId: flights_statistics_regional_growth_trends_retrieve
+      description: |-
+        Анализ роста/падения полетов по регионам за месяц.
+        Для каждого региона отдельно рассчитывается процент изменения.
+
+        GET /api/statistics/regional_growth_trends/
+
+        Query параметры:
+        - month: месяц для анализа (YYYY-MM-DD, по умолчанию текущий месяц)
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+  /api/v1/flights/statistics/zero_flight_days_analysis/:
+    get:
+      operationId: flights_statistics_zero_flight_days_analysis_retrieve
+      description: |-
+        Анализ дней без полетов по регионам.
+        Анализируются только регионы из планов полетов.
+
+        GET /api/statistics/zero_flight_days_analysis/
+
+        Query параметры:
+        - date_from: дата начала анализа (YYYY-MM-DD)
+        - date_to: дата окончания анализа (YYYY-MM-DD)
+        - top: количество топ регионов для отображения (по умолчанию 20)
+      tags:
+      - flights-statistics
+      security:
+      - cookieAuth: []
+      - basicAuth: []
+      - {}
+      responses:
+        '200':
+          description: No response body
+components:
+  schemas:
+    DroneOperator:
+      type: object
+      description: Сериализатор для операторов БАС.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: UUID identifier
+        name:
+          type: string
+          title: Название
+          description: Название организации или ФИО оператора
+          maxLength: 500
+        phone:
+          type: string
+          title: Телефон
+          description: Контактный телефон оператора
+          pattern: ^\+?[0-9\-\(\)\s]{7,20}$
+          maxLength: 20
+        organization_type:
+          type: string
+          title: Тип организации
+          description: МВД, МЧС, коммерческая организация и т.д.
+          maxLength: 200
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Создан
+          description: Creation datetime
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Изменён
+          description: Last modification datetime
+        flights_count:
+          type: integer
+          readOnly: true
+      required:
+      - created
+      - flights_count
+      - id
+      - modified
+      - name
+    DroneType:
+      type: object
+      description: Сериализатор для типов БАС.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: UUID identifier
+        code:
+          type: string
+          title: Код типа
+          description: Код типа БАС (например, BLA, AER)
+          maxLength: 10
+        name:
+          type: string
+          title: Название
+          description: Полное название типа БАС
+          maxLength: 200
+        description:
+          type: string
+          title: Описание
+          description: Дополнительная информация о типе БАС
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Создан
+          description: Creation datetime
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Изменён
+          description: Last modification datetime
+        flights_count:
+          type: integer
+          readOnly: true
+      required:
+      - code
+      - created
+      - flights_count
+      - id
+      - modified
+      - name
+    FlightCreate:
+      type: object
+      description: Сериализатор для создания планов полетов через API.
+      properties:
+        flight_id:
+          type: string
+          title: ID полета
+          description: Уникальный идентификатор плана полета
+          maxLength: 50
+        sid:
+          type: string
+          description: Системный идентификатор
+          maxLength: 20
+        reg_number:
+          type: string
+          title: Регистрационный номер БАС
+          description: Регистрационный номер БАС
+          maxLength: 50
+        planned_date:
+          type: string
+          format: date
+          title: Плановая дата полета
+          description: Плановая дата полета
+        planned_departure_time:
+          type: string
+          format: time
+          title: Плановое время вылета
+          description: Плановое время вылета по UTC
+        planned_duration:
+          type: string
+          title: Плановая продолжительность
+          description: Плановая продолжительность полета
+        min_altitude:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Минимальная высота
+          description: Минимальная высота полета в метрах
+        max_altitude:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Максимальная высота
+          description: Максимальная высота полета в метрах
+        departure_latitude:
+          type: number
+          format: double
+          writeOnly: true
+        departure_longitude:
+          type: number
+          format: double
+          writeOnly: true
+        destination_latitude:
+          type: number
+          format: double
+          writeOnly: true
+        destination_longitude:
+          type: number
+          format: double
+          writeOnly: true
+        operator:
+          type: string
+          format: uuid
+          description: Оператор БАС
+          title: Оператор
+        drone_type:
+          type: string
+          format: uuid
+          description: Тип беспилотной авиационной системы
+          title: Тип БАС
+        flight_zone:
+          type: string
+          format: uuid
+          description: Зона полета
+          nullable: true
+          title: Зона полета
+        purpose:
+          type: string
+          title: Цель полета
+          description: Цель и описание полета
+        special_conditions:
+          type: string
+          title: Особые условия
+          description: Особые условия полета и ограничения
+      required:
+      - departure_latitude
+      - departure_longitude
+      - destination_latitude
+      - destination_longitude
+      - drone_type
+      - flight_id
+      - operator
+      - planned_date
+      - planned_departure_time
+      - planned_duration
+      - sid
+    FlightPlan:
+      type: object
+      description: Сериализатор для планов полетов.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: UUID identifier
+        flight_id:
+          type: string
+          title: ID полета
+          description: Уникальный идентификатор плана полета
+          maxLength: 50
+        sid:
+          type: string
+          description: Системный идентификатор
+          maxLength: 20
+        reg_number:
+          type: string
+          title: Регистрационный номер БАС
+          description: Регистрационный номер БАС
+          maxLength: 50
+        planned_date:
+          type: string
+          format: date
+          title: Плановая дата полета
+          description: Плановая дата полета
+        planned_departure_time:
+          type: string
+          format: time
+          title: Плановое время вылета
+          description: Плановое время вылета по UTC
+        planned_duration:
+          type: string
+          title: Плановая продолжительность
+          description: Плановая продолжительность полета
+        min_altitude:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Минимальная высота
+          description: Минимальная высота полета в метрах
+        max_altitude:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Максимальная высота
+          description: Максимальная высота полета в метрах
+        departure_point_wkt:
+          type: string
+          description: Точка вылета в формате WKT
+          readOnly: true
+        destination_point_wkt:
+          type: string
+          description: Точка назначения в формате WKT
+          readOnly: true
+        departure_latitude:
+          type: number
+          format: double
+          description: Получение широты точки вылета.
+          readOnly: true
+        departure_longitude:
+          type: number
+          format: double
+          description: Получение долготы точки вылета.
+          readOnly: true
+        destination_latitude:
+          type: number
+          format: double
+          description: Получение широты точки назначения.
+          readOnly: true
+        destination_longitude:
+          type: number
+          format: double
+          description: Получение долготы точки назначения.
+          readOnly: true
+        operator:
+          type: string
+          format: uuid
+          description: Оператор БАС
+          title: Оператор
+        operator_name:
+          type: string
+          readOnly: true
+        drone_type:
+          type: string
+          format: uuid
+          description: Тип беспилотной авиационной системы
+          title: Тип БАС
+        drone_type_code:
+          type: string
+          readOnly: true
+        flight_zone:
+          type: string
+          format: uuid
+          description: Зона полета
+          nullable: true
+          title: Зона полета
+        flight_zone_code:
+          type: string
+          readOnly: true
+        departure_region:
+          type: string
+          format: uuid
+          description: Регион, откуда выполняется вылет
+          nullable: true
+          title: Регион вылета
+        departure_region_name:
+          type: string
+          readOnly: true
+        destination_region:
+          type: string
+          format: uuid
+          description: Регион назначения
+          nullable: true
+          title: Регион назначения
+        destination_region_name:
+          type: string
+          readOnly: true
+        purpose:
+          type: string
+          title: Цель полета
+          description: Цель и описание полета
+        special_conditions:
+          type: string
+          title: Особые условия
+          description: Особые условия полета и ограничения
+        has_actual_flight:
+          type: boolean
+          description: Проверка наличия фактических данных полета.
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Создан
+          description: Creation datetime
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Изменён
+          description: Last modification datetime
+      required:
+      - created
+      - departure_latitude
+      - departure_longitude
+      - departure_point_wkt
+      - departure_region_name
+      - destination_latitude
+      - destination_longitude
+      - destination_point_wkt
+      - destination_region_name
+      - drone_type
+      - drone_type_code
+      - flight_id
+      - flight_zone_code
+      - has_actual_flight
+      - id
+      - modified
+      - operator
+      - operator_name
+      - planned_date
+      - planned_departure_time
+      - planned_duration
+      - sid
+    FlightPlanGeo:
+      type: object
+      description: GeoJSON сериализатор для планов полетов.
+      properties:
+        type:
+          $ref: '#/components/schemas/GisFeatureEnum'
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: UUID identifier
+        geometry:
+          type: object
+          properties:
+            type:
+              type: string
+              enum:
+              - Point
+            coordinates:
+              type: array
+              items:
+                type: number
+                format: float
+              example:
+              - 12.9721
+              - 77.5933
+              minItems: 2
+              maxItems: 3
+        properties:
+          type: object
+          properties:
+            flight_id:
+              type: string
+              title: ID полета
+              description: Уникальный идентификатор плана полета
+              maxLength: 50
+            planned_date:
+              type: string
+              format: date
+              title: Плановая дата полета
+              description: Плановая дата полета
+            planned_departure_time:
+              type: string
+              format: time
+              title: Плановое время вылета
+              description: Плановое время вылета по UTC
+            operator_name:
+              type: string
+              readOnly: true
+            drone_type_code:
+              type: string
+              readOnly: true
+            departure_point_wkt:
+              type: string
+              description: Точка вылета в формате WKT
+              readOnly: true
+            destination_point_wkt:
+              type: string
+              description: Точка назначения в формате WKT
+              readOnly: true
+            purpose:
+              type: string
+              title: Цель полета
+              description: Цель и описание полета
+    GisFeatureEnum:
+      type: string
+      enum:
+      - Feature
+    PaginatedDroneOperatorList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DroneOperator'
+    PaginatedDroneTypeList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/DroneType'
+    PaginatedFlightPlanList:
+      type: object
+      required:
+      - count
+      - results
+      properties:
+        count:
+          type: integer
+          example: 123
+        next:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=4
+        previous:
+          type: string
+          nullable: true
+          format: uri
+          example: http://api.example.org/accounts/?page=2
+        results:
+          type: array
+          items:
+            $ref: '#/components/schemas/FlightPlan'
+    PatchedFlightPlan:
+      type: object
+      description: Сериализатор для планов полетов.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: UUID identifier
+        flight_id:
+          type: string
+          title: ID полета
+          description: Уникальный идентификатор плана полета
+          maxLength: 50
+        sid:
+          type: string
+          description: Системный идентификатор
+          maxLength: 20
+        reg_number:
+          type: string
+          title: Регистрационный номер БАС
+          description: Регистрационный номер БАС
+          maxLength: 50
+        planned_date:
+          type: string
+          format: date
+          title: Плановая дата полета
+          description: Плановая дата полета
+        planned_departure_time:
+          type: string
+          format: time
+          title: Плановое время вылета
+          description: Плановое время вылета по UTC
+        planned_duration:
+          type: string
+          title: Плановая продолжительность
+          description: Плановая продолжительность полета
+        min_altitude:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Минимальная высота
+          description: Минимальная высота полета в метрах
+        max_altitude:
+          type: integer
+          maximum: 2147483647
+          minimum: -2147483648
+          title: Максимальная высота
+          description: Максимальная высота полета в метрах
+        departure_point_wkt:
+          type: string
+          description: Точка вылета в формате WKT
+          readOnly: true
+        destination_point_wkt:
+          type: string
+          description: Точка назначения в формате WKT
+          readOnly: true
+        departure_latitude:
+          type: number
+          format: double
+          description: Получение широты точки вылета.
+          readOnly: true
+        departure_longitude:
+          type: number
+          format: double
+          description: Получение долготы точки вылета.
+          readOnly: true
+        destination_latitude:
+          type: number
+          format: double
+          description: Получение широты точки назначения.
+          readOnly: true
+        destination_longitude:
+          type: number
+          format: double
+          description: Получение долготы точки назначения.
+          readOnly: true
+        operator:
+          type: string
+          format: uuid
+          description: Оператор БАС
+          title: Оператор
+        operator_name:
+          type: string
+          readOnly: true
+        drone_type:
+          type: string
+          format: uuid
+          description: Тип беспилотной авиационной системы
+          title: Тип БАС
+        drone_type_code:
+          type: string
+          readOnly: true
+        flight_zone:
+          type: string
+          format: uuid
+          description: Зона полета
+          nullable: true
+          title: Зона полета
+        flight_zone_code:
+          type: string
+          readOnly: true
+        departure_region:
+          type: string
+          format: uuid
+          description: Регион, откуда выполняется вылет
+          nullable: true
+          title: Регион вылета
+        departure_region_name:
+          type: string
+          readOnly: true
+        destination_region:
+          type: string
+          format: uuid
+          description: Регион назначения
+          nullable: true
+          title: Регион назначения
+        destination_region_name:
+          type: string
+          readOnly: true
+        purpose:
+          type: string
+          title: Цель полета
+          description: Цель и описание полета
+        special_conditions:
+          type: string
+          title: Особые условия
+          description: Особые условия полета и ограничения
+        has_actual_flight:
+          type: boolean
+          description: Проверка наличия фактических данных полета.
+          readOnly: true
+        created:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Создан
+          description: Creation datetime
+        modified:
+          type: string
+          format: date-time
+          readOnly: true
+          title: Изменён
+          description: Last modification datetime
+    RussianRegion:
+      type: object
+      description: Сериализатор для регионов РФ с геометрией в нужном формате.
+      properties:
+        id:
+          type: string
+          format: uuid
+          readOnly: true
+          description: UUID identifier
+        name:
+          type: string
+          title: Название
+          description: Название субъекта РФ
+          maxLength: 255
+        code:
+          type: string
+          title: Код региона
+          description: Официальный код субъекта РФ
+          maxLength: 10
+        okato:
+          type: string
+          title: ОКАТО код
+          description: Код ОКАТО субъекта РФ
+          maxLength: 10
+        status:
+          type: string
+          title: Статус
+          description: Статус субъекта (край, область, республика и т.д.)
+          maxLength: 50
+        utc:
+          type: string
+          title: Часовой пояс UTC
+          description: Смещение относительно UTC (например, +3, +7)
+          maxLength: 10
+        timezone:
+          type: string
+          description: Название часового пояса (например, Europe/Moscow)
+          maxLength: 50
+        area:
+          type: string
+          description: Площадь региона, в км2
+          maxLength: 50
+      required:
+      - code
+      - id
+      - name
+  securitySchemes:
+    basicAuth:
+      type: http
+      scheme: basic
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: sessionid

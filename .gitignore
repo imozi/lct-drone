@@ -1,0 +1,34 @@
+# dev
+.yarn/
+!.yarn/releases
+.vscode/*
+!.vscode/launch.json
+!.vscode/*.code-snippets
+.idea
+.idea/workspace.xml
+.idea/usage.statistics.xml
+.idea/shelf
+.stylelintcache
+
+# deps
+node_modules/
+
+# Local env files
+!.env
+!.env.example
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# misc
+.DS_Store
+
+# build
+build/
+dist/

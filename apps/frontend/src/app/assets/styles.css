@@ -1,0 +1,30 @@
+@import 'https://fonts.googleapis.com/css2?family=Nunito:ital,wght@0,200..1000;1,200..1000&display=swap';
+@import "tailwindcss";
+@source "../../../node_modules/@lct/ui";
+
+
+@theme inline {
+  --font-sans: 'Nunito', sans-serif;
+  --color-background: var(--background);
+  --color-black: var(--text-black-primary);
+}
+
+
+@layer base {
+  :root {
+    --background: #F9F9F9;
+    --text-black-primary: #303133;
+  }
+
+  html {
+    @apply h-full;
+  }
+
+  body {
+    @apply h-full bg-background text-black;
+  }
+
+  #portal {
+    @apply h-full;
+  }
+}

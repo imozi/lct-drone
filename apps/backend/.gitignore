@@ -1,0 +1,185 @@
+# ======================================
+# Python
+# ======================================
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# ======================================
+# Virtual Environment
+# ======================================
+.venv/
+venv/
+ENV/
+env/
+
+# ======================================
+# Poetry
+# ======================================
+poetry.lock
+poetry.toml  # экспериментальный
+
+# ======================================
+# Packaging
+# ======================================
+build/
+dist/
+downloads/
+eggs/
+.eggs/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# ======================================
+# Django
+# ======================================
+*.log
+*.pot
+*.pyc
+*.mo
+*.pyo
+local_settings.py
+db.sqlite3
+db.sqlite3-journal
+media/
+staticfiles/
+
+# ======================================
+# FastAPI / General Python Web Logs
+# ======================================
+*.log
+
+# ======================================
+# Pytest
+# ======================================
+.cache/
+.pytest_cache/
+
+# ======================================
+# MyPy
+# ======================================
+.mypy_cache/
+.dmypy.json
+dmypy.json
+
+# ======================================
+# PyCharm / VSCode
+# ======================================
+.idea/
+.vscode/
+
+# ======================================
+# macOS
+# ======================================
+.DS_Store
+.AppleDouble
+.LSOverride
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+.com.apple.timemachine.donotpresent
+*.dropbox
+*.dropbox.attr
+
+# ======================================
+# Dotenv
+# ======================================
+.env
+.env.*
+
+# ======================================
+# Coverage / Testing
+# ======================================
+htmlcov/
+.tox/
+.coverage
+.coverage.*
+.cache
+nosetests.xml
+coverage.xml
+*.cover
+.hypothesis/
+
+# ======================================
+# Jupyter Notebook
+# ======================================
+.ipynb_checkpoints/
+
+# ======================================
+# SQLite
+# ======================================
+*.sqlite3
+*.db
+
+# ======================================
+# Temporary / Backup
+# ======================================
+*.orig
+*.bak
+*.swp
+*.swo
+
+# ======================================
+# Docker
+# ======================================
+.dockerignore
+docker-compose.override.yml
+**/__docker__/
+**/docker/
+**/Docker/
+
+# Docker volumes or local bind-mounts
+volumes/
+tmp/
+logs/
+*.pid
+
+# ======================================
+# CI/CD - GitHub Actions & GitLab CI
+# ======================================
+# GitHub Actions cache or artifacts
+.github/workflows/
+*.codecov.yml
+.github/CODEOWNERS
+
+# GitLab CI
+.gitlab-ci.yml
+*.auto.gitlab-ci.yml
+.gitlab/
+
+# CI build folders
+ci/
+ci_build/
+artifacts/
+*.log
+/nginx/
+/.poetry_lock_hash
+/docker-compose.yml
+/Dockerfile
+/entrypoint.sh
+/README.md
+/.pre-commit-config.yaml
+/src/apps/references/management/
+*/migrations/[0-9]*.py
+*/migrations/[0-9]*_*.py
+/src/apps/*/migrations/[0-9]*.py
+/src/apps/*/migrations/[0-9]*_*.py
+/data.json
+!/.env
+!/data.json
+
+!/docker-compose.yml
+
+!/Dockerfile
+
+!/Makefile
+
+!/pyproject.toml
+!/docker/
+full_data.json
